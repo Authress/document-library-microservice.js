@@ -1,0 +1,29 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Transform" : "AWS::Serverless-2016-10-31",
+  "Description": "S3 Explorer automation template",
+  "Parameters": {
+    "LambdaRoleName": {
+      "Type": "String",
+      "Description": "The name of the role to pass to lambda"
+    }
+  },
+
+  "Resources": {
+    "AWSLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Description": "Authress Authorizer",
+        "FunctionName": { "Fn::Sub": "${AWS::StackName}-${AWS::Region}-lambda" },
+        "Handler": "index.handler",
+        "Role": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LambdaRoleName}" },
+        "MemorySize": 128,
+        "Timeout": 10,
+        "Runtime": "nodejs12.x",
+        "Code": {
+          "ZipFile": "exports.handler = async() => Promise.resolve()"
+        }
+      }
+    }
+  }
+}
