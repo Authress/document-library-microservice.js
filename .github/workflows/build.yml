@@ -1,0 +1,51 @@
+on:
+  push:
+    branches:
+    - main
+    - master
+    - 'release/**'
+
+permissions:
+  contents: write
+  pull-requests: read
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Install packages
+      run: yarn --frozen-lockfile
+
+    - name: Run Setup
+      run: yarn setup
+    - name: Run build
+      run: yarn build
+
+    - name: Configure AWS Credentials
+      if: github.repository_owner == 'Authress' && github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master'
+      uses: aws-actions/configure-aws-credentials@036a4a1ddf2c0e7a782dca6e083c6c53e5d90321
+      with:
+        aws-region: eu-west-1
+        role-duration-seconds: 3600
+        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubRunnerAssumedRole
+        role-session-name: GitHubRunner-${{ github.repository_owner }}-S3Explorer-${{ github.run_number }}
+    - name: After build
+      if: github.repository_owner == 'Authress' && github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      run: yarn after_build
+    - name: Create Github Release and Tag
+      if: github.repository_owner == 'Authress' && github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master'
+      run: |
+        git tag ${GITHUB_REF/refs\/heads\/release\//}.$GITHUB_RUN_NUMBER
+        git push origin ${GITHUB_REF/refs\/heads\/release\//}.$GITHUB_RUN_NUMBER
