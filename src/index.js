@@ -1,7 +1,9 @@
 require('error-object-polyfill');
+const { cloneDeepWith } = require('lodash');
 
 const logger = require('./logger');
 const authressPermissionsManager = require('./authressPermissionsManager');
+const regionManager = require('./regionManager');
 
 process.env.AWS_NODEJS_CONNECTION_REUSE_ENABLED = 1;
 require('http').globalAgent.keepAlive = true;
@@ -36,18 +38,37 @@ try {
         'Access-Control-Allow-Origin': origin,
         'x-request-id': logger.invocationId,
         'strict-transport-security': 'max-age=31556926; includeSubDomains;',
-        'vary': 'Origin, Host'
+        'vary': 'Origin, Host, Sec-Fetch-Dest, Sec-Fetch-Mode, Sec-Fetch-Site',
+        'Cache-Control': 'no-store',
+        'x-region': regionManager.getCurrentAwsRegion()
       }, response.headers || {});
 
       const loggedResponse = response.statusCode >= 400 ? response : { statusCode: response.statusCode };
       logger.log({ title: 'RequestLogger', level: 'INFO', request, loggedResponse });
-      return response;
+      const applyHostReWrite = value => {
+        if (!value || typeof value !== 'string') {
+          return undefined;
+        }
+        return value.replace(/SERVICE_HOST_REWRITE/ig, request.headers.host);
+      };
+
+      return response ? cloneDeepWith(response, applyHostReWrite) : null;
     },
     errorMiddleware(request, error) {
       authressPermissionsManager.authorization = null;
 
       const origin = request.headers.origin || request.headers.Origin || request.headers.Referer && new URL(request.headers.Referer).origin
         || request.headers.referer && new URL(request.headers.referer).origin || '*';
+
+      if (error.code === 'InvalidInputRequest') {
+        const response = {
+          statusCode: 400,
+          headers: { 'x-request-id': logger.invocationId },
+          body: { errorCode: 'InvalidRequest', errorId: request.requestContext.requestId, title: error.message.title }
+        };
+        logger.log({ title: 'RequestLogger', level: 'INFO', source: 'InvalidInputRequest', request, response });
+        return response;
+      }
 
       logger.log({ title: 'RequestLogger', level: 'ERROR', request, error });
       return {
@@ -63,6 +84,11 @@ try {
   });
   module.exports = api;
 
+  api.setAuthorizer(request => {
+    const authorizer = require('./authorizer');
+    return authorizer.getPolicy(request);
+  });
+
   //   api.onSchedule(async (configuration, context) => {
   //     logger.startInvocation({ version: context.functionVersion });
   //     permissionsManager.authorization = null;
@@ -77,6 +103,10 @@ try {
   //     const result = await apiTrigger.onEvent(trigger, context);
   //     return result;
   //   });
+
+  const accountsController = require('./accountsController');
+  api.get('/accounts/{accountId}', request => accountsController.getAccount(request));
+  api.post('/accounts', request => accountsController.createAccount(request));
 
   const documentsController = require('./documentsController');
   api.get('/accounts/{accountId}/documents/{documentUri+}', request => documentsController.getDocument(request));

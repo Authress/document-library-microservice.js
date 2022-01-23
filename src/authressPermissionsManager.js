@@ -17,8 +17,9 @@ class AuthressPermissionsManager {
   }
 
   async ensureAdminRecord(accountId, userId) {
+    const recordId = `rec:${accountId}`;
     try {
-      await this.authressClient.accessRecords.getRecord('RECORD_ID');
+      await this.authressClient.accessRecords.getRecord(recordId);
     } catch (error) {
       if (error.status !== 404) {
         throw error;
@@ -26,11 +27,11 @@ class AuthressPermissionsManager {
 
       try {
         await this.authressClient.accessRecords.createRecord({
-          recordId: 'RECORD_ID',
-          name: 'RECORD_NAME',
-          users: [{ userId: 'USER_ID' }, { userId: `USER_ID|${userId}` }],
-          admins: [{ userId: 'USER_ID' }, { userId: 'USER_ID' }],
-          statements: [{ resources: [{ resourceUri: 'RESOURCE_URI' }], roles: ['Authress:Owner'] }]
+          recordId,
+          name: `Admin Access for ${accountId}`,
+          users: [{ userId }],
+          admins: [{ userId }],
+          statements: [{ resources: [{ resourceUri: `/accounts/${accountId}` }], roles: ['Authress:Owner'] }]
         });
       } catch (createError) {
         if (createError.status !== 409) {
