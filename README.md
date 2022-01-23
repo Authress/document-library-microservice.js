@@ -12,10 +12,22 @@
     </a>
 </p>
 
+This is the Document Library microservice. It uses S3 as a backend to expose a REST api providing the features of a Dropbox or Google Drive. To do this it utilizes an [Authress account](https://authress.io) and deploys a Lambda microservice to CloudFront. It is a globally redundant service which is 100% serverless and scales with usage.
 
-<!-- This is an S3 Explorer for AWS. It provides a simple and straightforward way for users to login using SSO and explore available S3 Buckets. Everything is done in the browser and requires only minimal setup using either [AWS Cognito](https://) or [Authress](https://authress.io).
+The Authress development team has provided this as a fully working service to demonstrate the ability to add granular access permissions to any microservice.
 
-Rhosys hosts an explorer to use out of the box for the community. For obvious security reasons, this is a UI only tool, and makes ZERO api calls to anywhere other than AWS. The following is a link to that explorer. However, if for some reason, other than security there is a benefit to hosting a clone of this, feel free to fork the repo and make any necessary changes. Alternatively, please contribute! -->
+## Features
+* Fully integratable with any user identity management tool. Follow the configuration steps and hook up the IdP to your Authress account.
+* Utilizes CloudFront to be global accessible and redundant using Lambda@Edge for edge compute
+* Generates Presigned urls where possible to enable GB or TB large uploads directly to and downloads from S3.
+* Hierarchy based permissions management to give access to cascading resources.
+* Multitenant architecture, enabling your users to use separated `accounts` to manage their own tenant in your service
+* One-click deploys directly from the [AWS Serverless Application(https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/create/app?applicationId=arn:aws:serverlessrepo:eu-west-1:922723803004:applications/S3-Document-Library)
+
+## Setup
+1. Deploy the lambda function using the `npm run deploy` function or directly from the [AWS Serverless Application(https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/create/app?applicationId=arn:aws:serverlessrepo:eu-west-1:922723803004:applications/S3-Document-Library).
+1. Configure your Authress account and generate a Service Client for access permission checks
+1. Done!
 
 ## Troubleshooting
 If you run into any problems just try running through the suggested [Troubleshooting steps](./docs/troubleshooting.md) and if that doesn't help, [file an issue](https://github.com/Authress/document-library-microservice.js/issues), we are usually quick to respond.
