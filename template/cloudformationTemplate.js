@@ -3,11 +3,11 @@ module.exports = {
     return {
       AWSTemplateFormatVersion: '2010-09-09',
       Transform: 'AWS::Serverless-2016-10-31',
-      Description: 'S3 Explorer automation template',
+      Description: 'S3 Document Library Microservice utilizing Authress.',
       Parameters: {
         CustomDomain: {
           Type: 'String',
-          Description: '[Optional] Configure a custom API domain for the document repository, by default uses API Gateway. Do not include the prefix "https://". [PATTERN: console.example.com]',
+          Description: '[Optional] Configure a custom API domain for the document repository, by default uses CloudFront domain. Do not include the prefix "https://". [PATTERN: console.example.com]',
           Default: ''
         }
       },
@@ -61,6 +61,7 @@ module.exports = {
           Type: 'AWS::IAM::Role',
           Properties: {
             AssumeRolePolicyDocument: {
+              RoleName: { 'Fn::Sub': '${AWS::StackName}-${AWS::Region}-AWSLambdaExecutionRole' },
               Statement: [
                 {
                   Action: ['sts:AssumeRole'],
@@ -75,6 +76,7 @@ module.exports = {
             Path: '/',
             Policies: [
               {
+                PolicyName: { 'Fn::Sub': '${AWS::StackName}-${AWS::Region}-AWSLambda-CW' },
                 PolicyDocument: {
                   Statement: [
                     {
@@ -84,17 +86,17 @@ module.exports = {
                     }
                   ],
                   Version: '2012-10-17'
-                },
-                PolicyName: { 'Fn::Sub': '${AWS::StackName}-${AWS::Region}-AWSLambda-CW' }
+                }
               },
               {
+                PolicyName: { 'Fn::Sub': '${AWS::StackName}-${AWS::Region}-AWSLambda' },
                 PolicyDocument: {
                   Statement: [
                     {
-                      Sid: 'S3Configuration',
-                      Action: ['s3:PutObject', 's3:DeleteObject'],
+                      Sid: 'ManageS3DocumentRepositoryBuckets',
+                      Action: ['s3:*'],
                       Effect: 'Allow',
-                      Resource: [{ 'Fn::Sub': '${BucketForS3ExplorerSavedConfiguration.Arn}/*' }]
+                      Resource: [{ 'Fn::Sub': '${AWS::AccountId}-${AWS::Region}-document-repository-service.*' }]
                     },
                     {
                       Sid: 'CertificateManagement',
@@ -104,21 +106,19 @@ module.exports = {
                     }
                   ],
                   Version: '2012-10-17'
-                },
-                PolicyName: { 'Fn::Sub': '${AWS::StackName}-${AWS::Region}-AWSLambda' }
+                }
               }
-            ],
-            RoleName: { 'Fn::Sub': '${AWS::StackName}-${AWS::Region}-AWSLambdaExecutionRole' }
+            ]
           }
         }
-      },
-
-      Outputs: {
-        ApiUrl: {
-          Description: "Document repository deployed API location, customize using the 'CustomDomain' parameter.",
-          Value: { 'Fn::If': ['DeployCustomDomain', { 'Fn::Sub': 'https://${CustomDomain}' }, { 'Fn::Sub': '${ApiGateway.Domain}' }] }
-        }
       }
+
+      // Outputs: {
+      //   ApiUrl: {
+      //     Description: "Document repository deployed API location, customize using the 'CustomDomain' parameter.",
+      //     Value: { 'Fn::If': ['DeployCustomDomain', { 'Fn::Sub': 'https://${CustomDomain}' }, { 'Fn::Sub': '${CloudFront.Domain}' }] }
+      //   }
+      // }
     };
   }
 };
