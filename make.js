@@ -4,9 +4,10 @@ const { ServerlessApplicationRepository, config } = require('aws-sdk');
 const commander = require('commander');
 const fs = require('fs-extra');
 const path = require('path');
-// const AwsArchitect = require('aws-architect');
+const AwsArchitect = require('aws-architect');
 
-config.update({ region: 'eu-west-1' });
+const REGION = 'eu-west-1';
+config.update({ region: REGION });
 
 function getVersion() {
   let release_version = '0.0';
@@ -32,6 +33,13 @@ commander.version(version);
 const packageMetadata = require('./package.json');
 packageMetadata.version = version;
 
+const apiOptions = {
+  deploymentBucket: 'document-repository-microservice-public-artifacts',
+  sourceDirectory: path.join(__dirname, 'src'),
+  description: packageMetadata.description,
+  regions: [REGION]
+};
+
 /**
   * Build
   */
@@ -56,12 +64,12 @@ commander
     console.log('');
 
     try {
-      // const awsArchitect = new AwsArchitect(packageMetadata);
+      const awsArchitect = new AwsArchitect(packageMetadata, apiOptions);
+      await awsArchitect.publishLambdaArtifactPromise();
 
       const serverlessApplicationRepository = new ServerlessApplicationRepository();
       const templateProvider = require('./template/cloudformationTemplate');
-      const lambdaFunction = await fs.readFile(path.join(__dirname, 'template/lambdaFunction.js'));
-      const template = templateProvider.getTemplate(lambdaFunction.toString());
+      const template = templateProvider.getTemplate(packageMetadata.name, version);
       const params = {
         ApplicationId: `arn:aws:serverlessrepo:${config.region}:${process.env.AWS_ACCOUNT_ID}:applications/S3-Document-Library`,
         SemanticVersion: version,
