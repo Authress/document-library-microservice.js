@@ -46,6 +46,14 @@ class AuthressPermissionsManager {
   }
 
   async hasAccessToResource(resourceUri, permission = 'READ') {
+    if (!accessKey) {
+      throw Error.create({ title: "Lambda environment variable 'AUTHRESS_SERVICE_CLIENT_ACCESS_KEY' must be specified.", errorUrl: 'https://authress.io/app/#/setup?focus=clients' }, 'DocumentLibraryMissingArgumentException');
+    }
+
+    if (!accessKey) {
+      throw Error.create({ title: "Lambda environment variable 'AUTHRESS_HOST_URL' must be specified. Create an Authress account to retrieve.", errorUrl: 'https://authress.io/app/#/api' }, 'DocumentLibraryMissingArgumentException');
+    }
+
     try {
       await this.getUserAuthressClient().userPermissions.authorizeUser(null, resourceUri, permission);
       return true;
