@@ -7,7 +7,17 @@ module.exports = {
       Parameters: {
         CustomDomain: {
           Type: 'String',
-          Description: '[Optional] Configure a custom API domain for the document repository, by default uses CloudFront domain. Do not include the prefix "https://". [PATTERN: console.example.com]',
+          Description: '[Optional] Configure a custom API domain for the document library, by default uses CloudFront domain. Do not include the prefix "https://". [PATTERN: console.example.com]',
+          Default: ''
+        },
+        AuthressHostUrl: {
+          Type: 'String',
+          Description: '[Optional] Your Authress account host url, found at: https://authress.io/app/#/api. This can be updated after deployment.',
+          Default: ''
+        },
+        AuthressServiceClientAccessKey: {
+          Type: 'String',
+          Description: '[Optional] Your Authress service client access key, found at: https://authress.io/app/#/setup?focus=clients. This can be updated after deployment.',
           Default: ''
         }
       },
@@ -30,20 +40,20 @@ module.exports = {
         AWSLambdaFunction: {
           Type: 'AWS::Lambda::Function',
           Properties: {
-            Description: 'Document Repository Microservice',
+            Description: 'Document Library Microservice',
             FunctionName: { 'Fn::Sub': '${AWS::StackName}-${AWS::Region}-lambda' },
             Handler: 'index.handler',
             Role: { 'Fn::GetAtt': ['AWSLambdaExecutionRole', 'Arn'] },
             Timeout: 900,
             Runtime: 'nodejs14.x',
             Code: {
-              S3Bucket: '',
+              S3Bucket: 'document-repository-microservice-public-artifacts',
               S3Key: `${packageName}/${lambdaVersion}/lambda.zip`
             },
             Environment: {
               Variables: {
-                AUTHRESS_HOST_URL: '',
-                AUTHRESS_SERVICE_CLIENT_ACCESS_KEY: ''
+                AUTHRESS_HOST_URL: { Ref: 'AuthressHostUrl' },
+                AUTHRESS_SERVICE_CLIENT_ACCESS_KEY: { Ref: 'AuthressServiceClientAccessKey' }
               }
             }
           }
@@ -93,10 +103,10 @@ module.exports = {
                 PolicyDocument: {
                   Statement: [
                     {
-                      Sid: 'ManageS3DocumentRepositoryBuckets',
+                      Sid: 'ManageS3DocumentLibraryBuckets',
                       Action: ['s3:*'],
                       Effect: 'Allow',
-                      Resource: [{ 'Fn::Sub': '${AWS::AccountId}-${AWS::Region}-document-repository-service.*' }]
+                      Resource: [{ 'Fn::Sub': '${AWS::AccountId}-${AWS::Region}-document-library-service.*' }]
                     },
                     {
                       Sid: 'CertificateManagement',
@@ -115,7 +125,7 @@ module.exports = {
 
       // Outputs: {
       //   ApiUrl: {
-      //     Description: "Document repository deployed API location, customize using the 'CustomDomain' parameter.",
+      //     Description: "Document library deployed API location, customize using the 'CustomDomain' parameter.",
       //     Value: { 'Fn::If': ['DeployCustomDomain', { 'Fn::Sub': 'https://${CustomDomain}' }, { 'Fn::Sub': '${CloudFront.Domain}' }] }
       //   }
       // }
