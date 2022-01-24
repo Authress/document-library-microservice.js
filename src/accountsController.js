@@ -1,6 +1,8 @@
+const { S3 } = require('aws-sdk');
 const shortUuid = require('short-uuid');
 
 const authressPermissionsManager = require('./authressPermissionsManager');
+const regionManager = require('./regionManager');
 
 class AccountsController {
   async getAccount(request) {
@@ -27,6 +29,15 @@ class AccountsController {
     const accountId = `acc_${accountIdTranslator.generate()}`;
 
     await authressPermissionsManager.ensureAdminRecord(accountId, userId);
+
+    const bucketId = `${request.requestContext.awsAccountId}-us-east-1-document-library-service.${accountId}`;
+    await new S3({ region: regionManager.getExpectedAwsRegion() }).createBucket({
+      Bucket: bucketId,
+      ACL: 'private',
+      CreateBucketConfiguration: {
+        LocationConstraint: regionManager.getExpectedAwsRegion()
+      }
+    }).promise();
 
     return {
       statusCode: 201,

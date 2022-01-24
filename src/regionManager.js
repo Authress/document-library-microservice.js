@@ -8,6 +8,10 @@ class RegionManager {
   getCurrentAwsRegion() {
     return aws.config.region;
   }
+
+  getExpectedAwsRegion() {
+    return 'us-east-1';
+  }
 }
 
 module.exports = new RegionManager();

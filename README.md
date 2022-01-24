@@ -32,9 +32,9 @@ The Authress development team has provided this as a fully working service to de
 ## Troubleshooting
 If you run into any problems just try running through the suggested [Troubleshooting steps](./docs/troubleshooting.md) and if that doesn't help, [file an issue](https://github.com/Authress/document-library-microservice.js/issues), we are usually quick to respond.
 
-## Standard use cases:
+<!-- ## Standard use cases:
 
 
 ## Contribution
 
-### Development
+### Development -->

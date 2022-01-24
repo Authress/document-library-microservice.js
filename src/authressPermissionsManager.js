@@ -1,7 +1,8 @@
 const { SSM } = require('aws-sdk');
 const { AuthressClient, ServiceClientTokenProvider } = require('authress-sdk');
+const regionManager = require('./regionManager');
 
-const ssmParameterAsync = new SSM({ region: 'us-east-1' }).getParametersByPath({ Path: '/Document-Library-Configuration' }).promise().then(r => r.Parameters[0].Value);
+const ssmParameterAsync = new SSM({ region: regionManager.getExpectedAwsRegion() }).getParametersByPath({ Path: '/Document-Library-Configuration' }).promise().then(r => r.Parameters[0].Value);
 
 class AuthressPermissionsManager {
   constructor() {

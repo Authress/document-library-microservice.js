@@ -42,6 +42,7 @@ class ApiTrigger {
       }, {}),
       body,
       requestContext: {
+        awsAccountId: context.invokedFunctionArn.split(':')[4],
         requestId: request.config && request.config.requestId,
         stage: null
       }

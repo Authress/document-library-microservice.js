@@ -1,7 +1,8 @@
-const { URL } = require('url');
+const { S3 } = require('aws-sdk');
 
 const authressPermissionsManager = require('./authressPermissionsManager');
 const logger = require('./logger');
+const regionManager = require('./regionManager');
 
 class DocumentsController {
   async getDocument(request) {
@@ -14,13 +15,14 @@ class DocumentsController {
       };
     }
 
-    // GET S3 signed get, and return
-    const s3UrlLocation = `https://${request.headers.host}/SET-THIS-VALUE`;
+    const bucketId = `${request.requestContext.awsAccountId}-us-east-1-document-library-service.${accountId}`;
+    const s3UrlLocation = await new S3({ region: regionManager.getExpectedAwsRegion() }).getSignedUrlPromise('getObject', { Bucket: bucketId, Key: `documents/${documentUri}`, Expires: 60 });
 
     return {
       statusCode: 307,
       headers: {
-        location: s3UrlLocation
+        'location': s3UrlLocation,
+        'cache-control': 'public, max-age=60'
       }
     };
   }
@@ -35,8 +37,19 @@ class DocumentsController {
       };
     }
 
-    // GET S3 signed get, and return
-    const s3UrlLocation = `https://${request.headers.host}/SET-THIS-VALUE`;
+    const bucketId = `${request.requestContext.awsAccountId}-us-east-1-document-library-service.${accountId}`;
+
+    const isDirectory = documentUri.slice(-1)[0] === '/';
+    const s3UrlLocation = new S3({ region: regionManager.getExpectedAwsRegion() }).createPresignedPost({
+      Bucket: bucketId,
+      Conditions: [
+        { acl: 'private' },
+        { bucket: bucketId },
+        ['starts-with', '$key', `documents/${documentUri}${isDirectory ? '' : '/'}`]
+        // Example additional values: https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-HTTPPOSTConstructPolicy.html
+      ],
+      Expires: 60
+    });
 
     return {
       statusCode: 307,
@@ -56,7 +69,14 @@ class DocumentsController {
       };
     }
 
-    // TODO: delete the s3 document
+    const bucketId = `${request.requestContext.awsAccountId}-us-east-1-document-library-service.${accountId}`;
+    try {
+      await new S3({ region: regionManager.getExpectedAwsRegion() }).deleteObject({ Bucket: bucketId, Key: `documents/${documentUri}` }).promise();
+    } catch (error) {
+      logger.log({ title: 'Failed to delete object', error });
+      return { statusCode: 400 };
+    }
+
     return {
       statusCode: 204
     };
