@@ -1,5 +1,6 @@
 module.exports = {
   getTemplate(packageName, lambdaVersion) {
+    const LambdaFunctionVersionResourceName = `LambdaFunctionVersion${lambdaVersion.replace(/[^a-z0-9]/ig, '')}`;
     return {
       AWSTemplateFormatVersion: '2010-09-09',
       Transform: 'AWS::Serverless-2016-10-31',
@@ -34,7 +35,7 @@ module.exports = {
             Tags: [
               {
                 Key: 'Service',
-                Value: { Ref: 'S3 Document Library' }
+                Value: 'S3 Document Library'
               }
             ],
             LifecycleConfiguration: {
@@ -111,7 +112,7 @@ module.exports = {
                 LambdaFunctionAssociations: [{
                   EventType: 'origin-request',
                   IncludeBody: true,
-                  LambdaFunctionARN: { 'Fn::Sub': `\${LambdaFunctionVersion-${Date.now()}.Arn}` }
+                  LambdaFunctionARN: { 'Fn::Sub': `\${${LambdaFunctionVersionResourceName}}` }
                 }]
               }
             }
@@ -121,9 +122,9 @@ module.exports = {
         LambdaConfiguration: {
           Type: 'AWS::SSM::Parameter',
           Properties: {
-            DataType: 'Text',
+            DataType: 'text',
             Description: 'Configuration for Document Library lambda',
-            Name: { 'Fn::Sub': 'Document-Library-Configuration/AuthressConfiguration' },
+            Name: { 'Fn::Sub': '/Document-Library-Configuration/AuthressConfiguration' },
             Tier: 'Standard',
             Type: 'StringList',
             Value: { 'Fn::Sub': '${AuthressHostUrl},${AuthressServiceClientAccessKey}' }
@@ -147,7 +148,7 @@ module.exports = {
           }
         },
 
-        [`LambdaFunctionVersion-${Date.now()}`]: {
+        [LambdaFunctionVersionResourceName]: {
           Type: 'AWS::Lambda::Version',
           Properties: {
             FunctionName: { Ref: 'AWSLambdaFunction' },
@@ -220,7 +221,7 @@ module.exports = {
       Outputs: {
         ApiUrl: {
           Description: "Document library deployed API location, customize using the 'CustomDomain' parameter.",
-          Value: { 'Fn::If': ['DeployCustomDomain', { 'Fn::Sub': 'https://${CustomDomain}' }, { 'Fn::Sub': 'https://${CloudFront.DomainName}' }] }
+          Value: { 'Fn::If': ['DeployCustomDomain', { 'Fn::Sub': 'https://${CustomDomain}' }, { 'Fn::Sub': 'https://${CloudFrontDistribution.DomainName}' }] }
         }
       }
     };

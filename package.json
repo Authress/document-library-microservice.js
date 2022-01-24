@@ -42,7 +42,7 @@
   },
   "scripts": {
     "build": "exit 0",
-    "start": "exit 0",
+    "start": "nodemon make.js run",
     "lint": "eslint --ext .js src make.js",
     "setup": "node make.js setup",
     "after_build": "node make.js after_build",

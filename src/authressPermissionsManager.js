@@ -1,32 +1,54 @@
+const { SSM } = require('aws-sdk');
 const { AuthressClient, ServiceClientTokenProvider } = require('authress-sdk');
 
-// Defined here: https://authress.io/app/#/api
-const authressBaseUrl = process.env.AUTHRESS_HOST_URL;
-
-// Create one here: https://authress.io/app/#/setup?focus=clients
-const accessKey = process.env.AUTHRESS_SERVICE_CLIENT_ACCESS_KEY;
+const ssmParameterAsync = new SSM({ region: 'us-east-1' }).getParametersByPath({ Path: '/Document-Library-Configuration' }).promise().then(r => r.Parameters[0].Value);
 
 class AuthressPermissionsManager {
   constructor() {
-    this.authressClient = new AuthressClient({ baseUrl: authressBaseUrl }, new ServiceClientTokenProvider(accessKey));
+    this.authressClient = null;
     this.authorization = null;
   }
 
-  getUserAuthressClient() {
+  async getParameters() {
+    const ssmParameter = await ssmParameterAsync;
+    const authressBaseUrl = ssmParameter.split(',')[0];
+    const accessKey = ssmParameter.split(',')[1];
+    if (!accessKey) {
+      throw Error.create({ title: 'SSM Parameter does not contain a valid Authress access key.', errorUrl: 'https://authress.io/app/#/setup?focus=clients' }, 'DocumentLibraryMissingArgumentException');
+    }
+
+    if (!authressBaseUrl) {
+      throw Error.create({ title: 'SSM Parameter does not contain a valid Authress domain host.', errorUrl: 'https://authress.io/app/#/api' }, 'DocumentLibraryMissingArgumentException');
+    }
+
+    return { accessKey, authressBaseUrl };
+  }
+
+  async getUserAuthressClient() {
+    const { authressBaseUrl } = await this.getParameters();
     return new AuthressClient({ baseUrl: authressBaseUrl }, () => this.authorization?.jwt);
+  }
+
+  async getAuthressServiceClient() {
+    if (!this.authressClient) {
+      const { authressBaseUrl, accessKey } = await this.getParameters();
+      this.authressClient = new AuthressClient({ baseUrl: authressBaseUrl }, new ServiceClientTokenProvider(accessKey));
+    }
+    return this.authressClient;
   }
 
   async ensureAdminRecord(accountId, userId) {
     const recordId = `rec:${accountId}`;
+    const authressClient = await this.getAuthressServiceClient();
     try {
-      await this.authressClient.accessRecords.getRecord(recordId);
+      await authressClient.accessRecords.getRecord(recordId);
     } catch (error) {
       if (error.status !== 404) {
         throw error;
       }
 
       try {
-        await this.authressClient.accessRecords.createRecord({
+        await authressClient.accessRecords.createRecord({
           recordId,
           name: `Admin Access for ${accountId}`,
           users: [{ userId }],
@@ -42,21 +64,15 @@ class AuthressPermissionsManager {
   }
 
   async getUserResources(resourceUri) {
-    const response = await this.getUserAuthressClient().userPermissions.getUserResources(null, resourceUri, 20, null, 'READ');
+    const userAuthressClient = await this.getUserAuthressClient();
+    const response = await userAuthressClient.userPermissions.getUserResources(null, resourceUri, 20, null, 'READ');
     return response.data;
   }
 
   async hasAccessToResource(resourceUri, permission = 'READ') {
-    if (!accessKey) {
-      throw Error.create({ title: "Lambda environment variable 'AUTHRESS_SERVICE_CLIENT_ACCESS_KEY' must be specified.", errorUrl: 'https://authress.io/app/#/setup?focus=clients' }, 'DocumentLibraryMissingArgumentException');
-    }
-
-    if (!accessKey) {
-      throw Error.create({ title: "Lambda environment variable 'AUTHRESS_HOST_URL' must be specified. Create an Authress account to retrieve.", errorUrl: 'https://authress.io/app/#/api' }, 'DocumentLibraryMissingArgumentException');
-    }
-
     try {
-      await this.getUserAuthressClient().userPermissions.authorizeUser(null, resourceUri, permission);
+      const userAuthressClient = await this.getUserAuthressClient();
+      await userAuthressClient.userPermissions.authorizeUser(null, resourceUri, permission);
       return true;
     } catch (error) {
       return false;

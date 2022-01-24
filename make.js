@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-const { ServerlessApplicationRepository, config } = require('aws-sdk');
+const { ServerlessApplicationRepository, config, S3 } = require('aws-sdk');
 const commander = require('commander');
 const fs = require('fs-extra');
 const path = require('path');
@@ -85,12 +85,30 @@ commander
     }
   });
 
+commander
+.command('run')
+.description('Run lambda web service locally.')
+.action(async () => {
+  const awsArchitect = new AwsArchitect(packageMetadata, apiOptions);
+
+  try {
+    const logger = require('./src/logger');
+    logger.logDebug = false;
+    const result = await awsArchitect.Run(8080, () => { /* Do not log from server when running locally */ });
+    console.log(JSON.stringify(result.title, null, 2));
+  } catch (failure) {
+    console.log(JSON.stringify(failure, null, 2));
+  }
+});
+
 commander.command('test-setup')
 .description('Test the deployment')
 .action(async () => {
   try {
     const templateProvider = require('./template/cloudformationTemplate');
-    const template = templateProvider.getTemplate(packageMetadata.name, version);
+    const result = await new S3().listObjectsV2({ Bucket: apiOptions.deploymentBucket, StartAfter: 'document-library-microservice/0.1.1' }).promise();
+    const latestLambdaVersion = result.Contents.reduce((latest, c) => !latest || c.LastModified > latest.LastModified ? c : latest, null).Key.split('/')[1];
+    const template = templateProvider.getTemplate(packageMetadata.name, latestLambdaVersion);
     await fs.writeFile(path.join(__dirname, 'template/cloudformationTemplate.json'), typeof template === 'object' ? JSON.stringify(template) : template);
   } catch (error) {
     console.log('Failed to push new application version', error);
