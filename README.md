@@ -22,6 +22,7 @@ The Authress development team has provided this as a fully working service to de
 * _What can this really do_ - [Features](#features)
 * _I'm having a problem_ - [Troubleshooting](./docs/troubleshooting.md)
 * _It would be really great if it also_ - [Create an issue](https://github.com/Authress/document-library-microservice.js/issues)
+* _What does the API look like_ - [Service Routes](https://github.com/Authress/document-library-microservice.js/blob/release/0.1/src/index.js#L100) (We are working on exposing this in an API Explorer to make it easy to interact with.)
 
 ## Features
 * Fully integratable with any user identity management tool. Follow the configuration steps and hook up the IdP to your Authress account.
