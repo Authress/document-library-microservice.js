@@ -47,7 +47,7 @@ module.exports = {
             Timeout: 900,
             Runtime: 'nodejs14.x',
             Code: {
-              S3Bucket: 'document-repository-microservice-public-artifacts',
+              S3Bucket: 'document-repository-microservice-public-artifacts-us-east-1',
               S3Key: `${packageName}/${lambdaVersion}/lambda.zip`
             },
             Environment: {
@@ -70,8 +70,8 @@ module.exports = {
         AWSLambdaExecutionRole: {
           Type: 'AWS::IAM::Role',
           Properties: {
+            RoleName: { 'Fn::Sub': '${AWS::StackName}-${AWS::Region}-AWSLambdaExecutionRole' },
             AssumeRolePolicyDocument: {
-              RoleName: { 'Fn::Sub': '${AWS::StackName}-${AWS::Region}-AWSLambdaExecutionRole' },
               Statement: [
                 {
                   Action: ['sts:AssumeRole'],
@@ -106,7 +106,7 @@ module.exports = {
                       Sid: 'ManageS3DocumentLibraryBuckets',
                       Action: ['s3:*'],
                       Effect: 'Allow',
-                      Resource: [{ 'Fn::Sub': '${AWS::AccountId}-${AWS::Region}-document-library-service.*' }]
+                      Resource: [{ 'Fn::Sub': 'arn:aws:s3:::${AWS::AccountId}-${AWS::Region}-document-library-service.*' }]
                     },
                     {
                       Sid: 'CertificateManagement',

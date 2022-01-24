@@ -34,7 +34,7 @@ const packageMetadata = require('./package.json');
 packageMetadata.version = version;
 
 const apiOptions = {
-  deploymentBucket: 'document-repository-microservice-public-artifacts',
+  deploymentBucket: 'document-repository-microservice-public-artifacts-us-east-1',
   sourceDirectory: path.join(__dirname, 'src'),
   description: packageMetadata.description,
   regions: [REGION]
@@ -90,8 +90,7 @@ commander.command('test-setup')
 .action(async () => {
   try {
     const templateProvider = require('./template/cloudformationTemplate');
-    const lambdaFunction = await fs.readFile(path.join(__dirname, 'template/lambdaFunction.js'));
-    const template = templateProvider.getTemplate(lambdaFunction.toString());
+    const template = templateProvider.getTemplate(packageMetadata.name, version);
     await fs.writeFile(path.join(__dirname, 'template/cloudformationTemplate.json'), typeof template === 'object' ? JSON.stringify(template) : template);
   } catch (error) {
     console.log('Failed to push new application version', error);
