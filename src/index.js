@@ -89,20 +89,13 @@ try {
     return authorizer.getPolicy(request);
   });
 
-  //   api.onSchedule(async (configuration, context) => {
-  //     logger.startInvocation({ version: context.functionVersion });
-  //     permissionsManager.authorization = null;
-  //     const apiTrigger = require('./apiTrigger');
-  //     const result = await apiTrigger.onSchedule(configuration, context);
-  //     return result;
-  //   });
-  //   api.onEvent(async (trigger, context) => {
-  //     logger.startInvocation({ version: context.functionVersion });
-  //     permissionsManager.authorization = null;
-  //     const apiTrigger = require('./apiTrigger');
-  //     const result = await apiTrigger.onEvent(trigger, context);
-  //     return result;
-  //   });
+  api.onEvent(async (trigger, context) => {
+    logger.startInvocation({ version: context.functionVersion });
+    authressPermissionsManager.authorization = null;
+    const apiTrigger = require('./apiTrigger');
+    const result = await apiTrigger.onEvent(trigger, context, (...args) => api.handler(...args));
+    return result;
+  });
 
   const accountsController = require('./accountsController');
   api.get('/accounts/{accountId}', request => accountsController.getAccount(request));
