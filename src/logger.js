@@ -1,5 +1,5 @@
 const stringify = require('json-stringify-safe');
-const uuid = require('uuid');
+const shortUuid = require('short-uuid');
 
 // Remove unnecessary strings from logging
 function replacer(key, value) {
@@ -46,7 +46,7 @@ class Logger {
   }
 
   startInvocation(metadata) {
-    this.invocationId = uuid.v4();
+    this.invocationId = shortUuid.generate();
     this.startTime = Date.now();
     this.metadata = Object.assign({ tracking: [{ name: 'Start', time: this.startTime }] }, metadata || {});
     return this.invocationId;

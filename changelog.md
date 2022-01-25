@@ -1,3 +1,4 @@
 # ChangeLog
 
-## 1.0 ##
+## 0.1 ##
+* Deploy issuer validation to utilize Authress base url

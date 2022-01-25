@@ -26,19 +26,14 @@
   "mode": "production",
   "dependencies": {
     "agentkeepalive": "^4.2.0",
-    "authress-sdk": "^1.2.13",
-    "axios": "^0.25.0",
-    "axios-retry": "^3.2.4",
-    "base64url": "^3.0.1",
+    "authress-sdk": "^1.2.14",
     "cfn-response": "^1.0.1",
     "cookie": "^0.4.1",
     "error-object-polyfill": "^1.1.14",
-    "jose": "^4.3.9",
     "json-stringify-safe": "^5.0.1",
     "lodash": "^4.17.21",
     "openapi-factory": "^5.2.17",
-    "short-uuid": "^4.2.0",
-    "uuid": "^8.3.2"
+    "short-uuid": "^4.2.0"
   },
   "scripts": {
     "build": "exit 0",
@@ -60,7 +55,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
     "fs-extra": "^8.1.0",
-    "mocha": "^9.1.4"
+    "mocha": "^9.2.0"
   },
   "engines": {
     "node": ">=14"

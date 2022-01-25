@@ -1,5 +1,5 @@
 const { SSM } = require('aws-sdk');
-const { AuthressClient, ServiceClientTokenProvider } = require('authress-sdk');
+const { AuthressClient, ServiceClientTokenProvider, TokenVerifier } = require('authress-sdk');
 const regionManager = require('./regionManager');
 
 const ssmParameterAsync = new SSM({ region: regionManager.getExpectedAwsRegion() }).getParametersByPath({ Path: '/Document-Library-Configuration' }).promise().then(r => r.Parameters[0].Value);
@@ -22,7 +22,7 @@ class AuthressPermissionsManager {
       throw Error.create({ title: 'SSM Parameter does not contain a valid Authress domain host.', errorUrl: 'https://authress.io/app/#/api' }, 'DocumentLibraryMissingArgumentException');
     }
 
-    return { accessKey, authressBaseUrl };
+    return { accessKey, authressBaseUrl: new URL(`https://${authressBaseUrl.replace(/^(https?:\/\/)/, '')}`).toString() };
   }
 
   async getUserAuthressClient() {
@@ -78,6 +78,11 @@ class AuthressPermissionsManager {
     } catch (error) {
       return false;
     }
+  }
+
+  async verifyToken(token) {
+    const { authressBaseUrl } = await this.getParameters();
+    return TokenVerifier(authressBaseUrl, token);
   }
 }
 
