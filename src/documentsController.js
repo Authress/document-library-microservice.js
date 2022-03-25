@@ -47,6 +47,21 @@ class DocumentsController {
         { bucket: bucketId },
         ['starts-with', '$key', `documents/${documentUri}${isDirectory ? '' : '/'}`]
         // Example additional values: https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-HTTPPOSTConstructPolicy.html
+
+        // Validate s3 specific properties
+        // {"acl": "public-read"},
+        // {"success_action_redirect": "http://sigv4examplebucket.s3.amazonaws.com/successful_upload.html"},
+        // ["starts-with", "$Content-Type", "image/"],
+        // {"x-amz-server-side-encryption": "AES256"},
+
+        // Set meta data properties
+        // {"x-amz-meta-uuid": "14365123651274"},
+        // ["starts-with", "$x-amz-meta-tag", ""],
+    
+        // X-AMZ properties
+        // {"x-amz-credential": "AKIAIOSFODNN7EXAMPLE/20151229/us-east-1/s3/aws4_request"},
+        // {"x-amz-algorithm": "AWS4-HMAC-SHA256"},
+        // {"x-amz-date": "20151229T000000Z" }
       ],
       Expires: 60
     });
