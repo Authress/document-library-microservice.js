@@ -47,6 +47,7 @@ class DocumentsController {
         { bucket: bucketId },
         ['starts-with', '$key', `documents/${documentUri}${isDirectory ? '' : '/'}`]
         // Example additional values: https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-HTTPPOSTConstructPolicy.html
+        // And more properties: https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectPOST.html
 
         // Validate s3 specific properties
         // {"acl": "public-read"},
