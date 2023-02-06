@@ -14,7 +14,9 @@
 
 This is the Document Library microservice.
 
-It uses S3 as a backend to expose a REST api providing the features of a Dropbox or Google Drive-like solution. To do this it utilizes an [Authress account](https://authress.io) and deploys a Lambda microservice to CloudFront. It is a globally redundant service which is 100% serverless and scales with usage.
+It is an example that uses a REST api to expose S3 in a secure but abstracted way. The full details of the configuration are available in our [Knowledge Base](https://authress.io/knowledge-base/docs/implementation-examples/document-repository)
+
+Specifically it uses S3 as a backend to expose a REST api providing the features of a Dropbox or Google Drive-like solution. To do this, it utilizes an [Authress account](https://authress.io) and deploys a Lambda microservice to CloudFront. It is a globally redundant service which is 100% serverless and scales with usage.
 
 The Authress development team has provided this as a fully working service to demonstrate the ability to add granular access permissions to any microservice.
 
