@@ -55,7 +55,8 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
     "fs-extra": "^8.1.0",
-    "mocha": "^9.2.0"
+    "mocha": "^9.2.0",
+    "nodemon": "^2.0.22"
   },
   "engines": {
     "node": ">=14"

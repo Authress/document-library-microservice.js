@@ -140,7 +140,7 @@ module.exports = {
             Role: { 'Fn::GetAtt': ['AWSLambdaExecutionRole', 'Arn'] },
             MemorySize: 512,
             Timeout: 30,
-            Runtime: 'nodejs14.x',
+            Runtime: 'nodejs16.x',
             Code: {
               S3Bucket: 'document-repository-microservice-public-artifacts-us-east-1',
               S3Key: `${packageName}/${lambdaVersion}/lambda.zip`

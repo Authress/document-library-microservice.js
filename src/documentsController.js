@@ -42,6 +42,10 @@ class DocumentsController {
     const isDirectory = documentUri.slice(-1)[0] === '/';
     const s3UrlLocation = new S3({ region: regionManager.getExpectedAwsRegion() }).createPresignedPost({
       Bucket: bucketId,
+      // Fields support direct data as form fields and are directly translated to `eq` conditions. For exact matches they can be put here or used in the Conditions.
+      // Fields: {
+      //   // key: value
+      // },
       Conditions: [
         { acl: 'private' },
         { bucket: bucketId },
@@ -52,8 +56,9 @@ class DocumentsController {
         // Validate s3 specific properties
         // {"acl": "public-read"},
         // {"success_action_redirect": "http://sigv4examplebucket.s3.amazonaws.com/successful_upload.html"},
-        // ["starts-with", "$Content-Type", "image/"],
+        // ["starts-with", "$Content-Type", "image/"], // or ["eq", "$Content-Type", "image/jpeg"],
         // {"x-amz-server-side-encryption": "AES256"},
+        // ['content-length-range', 0, 10000000], // 10 MB
 
         // Set meta data properties
         // {"x-amz-meta-uuid": "14365123651274"},
