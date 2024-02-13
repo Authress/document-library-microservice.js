@@ -1,18 +1,10 @@
-# AWS S3 Document Library
+# AWS S3 Document Repository microservice
 
 <p align="center">
-    <a href="./LICENSE" alt="apache 2.0 license">
-      <img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg">
-    </a>
-    <a href="https://us-east-1.console.aws.amazon.com/lambda/home?region=us-east-1#/create/app?applicationId=arn:aws:serverlessrepo:eu-west-1:922723803004:applications/S3-Document-Library" alt="Installations">
-      <img src="https://img.shields.io/badge/Installed%20Deployments-1637-success">
-    </a>
-    <a href="https://us-east-1.console.aws.amazon.com/lambda/home?region=us-east-1#/create/app?applicationId=arn:aws:serverlessrepo:eu-west-1:922723803004:applications/S3-Document-Library" alt="AWS Serverless Application">
-        <img src="https://img.shields.io/badge/AWS%20Serverless%20Application-S3%20Document%20Library-blue">
-    </a>
-    <a href="https://authress.io/community" alt="Community">
-      <img src="https://img.shields.io/badge/Community-Discord-fbaf0b.svg">
-    </a>
+    <a href="./LICENSE" alt="apache 2.0 license"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg"></a>
+    <a href="https://us-east-1.console.aws.amazon.com/lambda/home?region=us-east-1#/create/app?applicationId=arn:aws:serverlessrepo:eu-west-1:922723803004:applications/S3-Document-Library" alt="Installations"><img src="https://img.shields.io/badge/Installed%20Deployments-1637-success"></a>
+    <a href="https://us-east-1.console.aws.amazon.com/lambda/home?region=us-east-1#/create/app?applicationId=arn:aws:serverlessrepo:eu-west-1:922723803004:applications/S3-Document-Library" alt="AWS Serverless Application"><img src="https://img.shields.io/badge/AWS%20Serverless%20Application-S3%20Document%20Library-blue"></a>
+    <a href="https://authress.io/community" alt="Community"><img src="https://img.shields.io/badge/Community-Discord-fbaf0b.svg"></a>
 </p>
 
 This is the Document Library microservice.
