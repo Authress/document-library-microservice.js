@@ -1,4 +1,8 @@
-# AWS S3 Document Repository microservice
+<p align="center">
+  <img src="https://authress.io/static/images/linkedin-banner.png" alt="Authress media banner">
+</p>
+
+# Authress example: AWS S3 Document Repository Microservice
 
 <p align="center">
     <a href="./LICENSE" alt="apache 2.0 license"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg"></a>
